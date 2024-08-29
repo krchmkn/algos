@@ -1,5 +1,4 @@
 /// Binary search
-#[allow(dead_code)]
 fn binary_search<'a, T: PartialOrd>(list: &'a [T], item: &'a T) -> Option<&'a T> {
     if list.is_empty() {
         return None;
