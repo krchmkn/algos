@@ -50,7 +50,7 @@ mod tests {
     }
 
     #[test]
-    fn sorted() {
+    fn sort() {
         let mut arr = [2, 5, 4, 1, 3];
         quick_sort(&mut arr);
         assert!(arr.windows(2).all(|x| x[0] <= x[1]));
