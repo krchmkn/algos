@@ -47,10 +47,10 @@ mod tests {
         let mut graph = Graph::new();
 
         let vertex_a = "A";
-        graph.add_vertex("A");
+        graph.add_vertex(vertex_a);
 
         let vertex_b = "B";
-        graph.add_vertex("B");
+        graph.add_vertex(vertex_b);
 
         graph.add_edge(vertex_a, vertex_b);
 
