@@ -1,5 +1,5 @@
 /// Graph
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 struct Graph {
     edges: HashMap<String, Vec<String>>,
@@ -25,6 +25,27 @@ impl Graph {
 
     fn adjacents(&self, vertex: &str) -> Option<&Vec<String>> {
         self.edges.get(vertex)
+    }
+
+    fn bfs(&self, start: &str) -> HashSet<String> {
+        let mut visited = HashSet::new();
+        let mut queue = VecDeque::new();
+
+        visited.insert(start.to_string());
+        queue.push_back(start.to_string());
+
+        while let Some(node) = queue.pop_front() {
+            if let Some(neighbors) = self.edges.get(&node) {
+                for neighbor in neighbors {
+                    if !visited.contains(neighbor) {
+                        visited.insert(neighbor.to_string());
+                        queue.push_back(neighbor.to_string());
+                    }
+                }
+            }
+        }
+
+        visited
     }
 }
 
@@ -56,5 +77,23 @@ mod tests {
 
         assert_eq!(graph.adjacents(vertex_a).unwrap().len(), 1);
         assert_eq!(graph.adjacents(vertex_a).unwrap()[0], vertex_b);
+    }
+
+    #[test]
+    fn bfs() {
+        let mut graph = Graph::new();
+
+        graph.add_vertex("A");
+        graph.add_vertex("B");
+        graph.add_vertex("C");
+        graph.add_vertex("D");
+
+        graph.add_edge("A", "B");
+        graph.add_edge("B", "C");
+        graph.add_edge("C", "D");
+        graph.add_edge("D", "A");
+
+        let visited = graph.bfs("A");
+        assert_eq!(visited.len(), 4);
     }
 }
