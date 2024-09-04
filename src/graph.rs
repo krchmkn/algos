@@ -2,7 +2,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
 struct Graph {
-    edges: HashMap<String, Vec<String>>,
+    edges: HashMap<String, Vec<(String, usize)>>,
 }
 
 impl Graph {
@@ -16,30 +16,29 @@ impl Graph {
         self.edges.entry(vertex.to_string()).or_insert(Vec::new());
     }
 
-    fn add_edge(&mut self, from: &str, to: &str) {
+    fn add_edge(&mut self, from: &str, to: &str, weight: usize) {
         self.edges
             .entry(from.to_string())
             .or_insert(Vec::new())
-            .push(to.to_string());
+            .push((to.to_string(), weight));
     }
 
-    fn adjacents(&self, vertex: &str) -> Option<&Vec<String>> {
+    fn adjacents(&self, vertex: &str) -> Option<&Vec<(String, usize)>> {
         self.edges.get(vertex)
     }
 
-    fn bfs(&self, start: &str) -> HashSet<String> {
+    fn bfs<'a>(&'a self, start: &'a str) -> HashSet<&'a str> {
         let mut visited = HashSet::new();
         let mut queue = VecDeque::new();
 
-        visited.insert(start.to_string());
-        queue.push_back(start.to_string());
+        visited.insert(start);
+        queue.push_back(start);
 
         while let Some(node) = queue.pop_front() {
-            if let Some(neighbors) = self.edges.get(&node) {
+            if let Some(neighbors) = self.edges.get(node) {
                 for neighbor in neighbors {
-                    if !visited.contains(neighbor) {
-                        visited.insert(neighbor.to_string());
-                        queue.push_back(neighbor.to_string());
+                    if visited.insert(&neighbor.0) {
+                        queue.push_back(&neighbor.0);
                     }
                 }
             }
@@ -48,16 +47,14 @@ impl Graph {
         visited
     }
 
-    fn dfs(&self, node: &str, visited: &mut HashSet<String>) {
-        if visited.contains(&node.to_string()) {
+    fn dfs<'a>(&'a self, node: &'a str, visited: &mut HashSet<&'a str>) {
+        if !visited.insert(node) {
             return;
         }
 
-        visited.insert(node.to_string());
-
-        if let Some(neighbors) = self.edges.get(&node.to_string()) {
+        if let Some(neighbors) = self.edges.get(node) {
             for neighbor in neighbors {
-                self.dfs(neighbor, visited);
+                self.dfs(&neighbor.0, visited);
             }
         }
     }
@@ -87,10 +84,10 @@ mod tests {
         let vertex_b = "B";
         graph.add_vertex(vertex_b);
 
-        graph.add_edge(vertex_a, vertex_b);
+        graph.add_edge(vertex_a, vertex_b, 1);
 
         assert_eq!(graph.adjacents(vertex_a).unwrap().len(), 1);
-        assert_eq!(graph.adjacents(vertex_a).unwrap()[0], vertex_b);
+        assert_eq!(graph.adjacents(vertex_a).unwrap()[0].0, vertex_b);
     }
 
     #[test]
@@ -102,10 +99,10 @@ mod tests {
         graph.add_vertex("C");
         graph.add_vertex("D");
 
-        graph.add_edge("A", "B");
-        graph.add_edge("B", "C");
-        graph.add_edge("C", "D");
-        graph.add_edge("D", "A");
+        graph.add_edge("A", "B", 1);
+        graph.add_edge("B", "C", 2);
+        graph.add_edge("C", "D", 3);
+        graph.add_edge("D", "A", 4);
 
         let visited = graph.bfs("A");
         assert_eq!(visited.len(), 4);
@@ -124,10 +121,10 @@ mod tests {
         graph.add_vertex("C");
         graph.add_vertex("D");
 
-        graph.add_edge("A", "B");
-        graph.add_edge("B", "C");
-        graph.add_edge("C", "D");
-        graph.add_edge("D", "A");
+        graph.add_edge("A", "B", 1);
+        graph.add_edge("B", "C", 2);
+        graph.add_edge("C", "D", 3);
+        graph.add_edge("D", "A", 4);
 
         let mut visited = HashSet::new();
 
