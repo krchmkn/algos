@@ -47,6 +47,20 @@ impl Graph {
 
         visited
     }
+
+    fn dfs(&self, node: &str, visited: &mut HashSet<String>) {
+        if visited.contains(&node.to_string()) {
+            return;
+        }
+
+        visited.insert(node.to_string());
+
+        if let Some(neighbors) = self.edges.get(&node.to_string()) {
+            for neighbor in neighbors {
+                self.dfs(neighbor, visited);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -95,5 +109,35 @@ mod tests {
 
         let visited = graph.bfs("A");
         assert_eq!(visited.len(), 4);
+        assert!(visited.contains("A"));
+        assert!(visited.contains("B"));
+        assert!(visited.contains("C"));
+        assert!(visited.contains("D"));
+    }
+
+    #[test]
+    fn dfs() {
+        let mut graph = Graph::new();
+
+        graph.add_vertex("A");
+        graph.add_vertex("B");
+        graph.add_vertex("C");
+        graph.add_vertex("D");
+
+        graph.add_edge("A", "B");
+        graph.add_edge("B", "C");
+        graph.add_edge("C", "D");
+        graph.add_edge("D", "A");
+
+        let mut visited = HashSet::new();
+
+        graph.dfs("A", &mut visited);
+
+        println!("{:?}", &visited);
+        assert_eq!(visited.len(), 4);
+        assert!(visited.contains("A"));
+        assert!(visited.contains("B"));
+        assert!(visited.contains("C"));
+        assert!(visited.contains("D"));
     }
 }
