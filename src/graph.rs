@@ -1,5 +1,7 @@
 /// Graph
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::usize::MAX;
 
 struct Graph {
     edges: HashMap<String, Vec<(String, usize)>>,
@@ -57,6 +59,62 @@ impl Graph {
                 self.dfs(&neighbor.0, visited);
             }
         }
+    }
+
+    fn dijkstra(&self, start: &str) -> HashMap<String, usize> {
+        let mut distances: HashMap<&str, usize> =
+            self.edges.keys().map(|v| (v.as_str(), MAX)).collect();
+        let mut heap = BinaryHeap::new();
+
+        distances.insert(start, 0);
+        heap.push(State {
+            vertex: start,
+            cost: 0,
+        });
+
+        while let Some(State { vertex, cost }) = heap.pop() {
+            if cost > distances[vertex] {
+                continue;
+            }
+
+            if let Some(neighbors) = self.adjacents(vertex) {
+                for neighbor in neighbors {
+                    let neighbor_str = neighbor.0.as_str();
+                    let next_cost = cost + neighbor.1;
+
+                    if next_cost < *distances.get(neighbor_str).unwrap_or(&MAX) {
+                        distances.insert(neighbor_str, next_cost);
+                        heap.push(State {
+                            vertex: neighbor_str,
+                            cost: next_cost,
+                        });
+                    }
+                }
+            }
+        }
+
+        distances
+            .iter()
+            .map(|(&k, &v)| (k.to_string(), v))
+            .collect()
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct State<'a> {
+    vertex: &'a str,
+    cost: usize,
+}
+
+impl<'a> Ord for State<'a> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.cost.cmp(&self.cost)
+    }
+}
+
+impl<'a> PartialOrd for State<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -136,5 +194,33 @@ mod tests {
         assert!(visited.contains("B"));
         assert!(visited.contains("C"));
         assert!(visited.contains("D"));
+    }
+
+    #[test]
+    fn dijkstra() {
+        let mut graph = Graph::new();
+
+        graph.add_vertex("A");
+        graph.add_vertex("B");
+        graph.add_vertex("C");
+        graph.add_vertex("D");
+        graph.add_vertex("E");
+
+        graph.add_edge("A", "B", 1);
+        graph.add_edge("A", "C", 4);
+        graph.add_edge("B", "C", 2);
+        graph.add_edge("B", "D", 5);
+        graph.add_edge("C", "D", 1);
+        graph.add_edge("D", "E", 4);
+
+        let distances = graph.dijkstra("A");
+
+        println!("{:?}", distances);
+
+        assert_eq!(distances["A"], 0);
+        assert_eq!(distances["B"], 1);
+        assert_eq!(distances["C"], 3);
+        assert_eq!(distances["D"], 4);
+        assert_eq!(distances["E"], 8);
     }
 }
