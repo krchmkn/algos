@@ -4,6 +4,7 @@ mod coin_change;
 mod factorial;
 mod graph;
 mod heap;
+mod knn;
 mod levenshtein_distance;
 mod queue;
 mod quick_sort;
