@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 mod binary_search;
+mod coin_change;
 mod factorial;
 mod graph;
 mod heap;
