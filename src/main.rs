@@ -5,6 +5,7 @@ use std::io::{self, Write};
 use std::path::Path;
 
 mod binary_search;
+mod bresenham_line;
 mod coin_change;
 mod factorial;
 mod graph;
@@ -24,6 +25,8 @@ fn main() -> io::Result<()> {
         "# algos".to_string(),
     ];
 
+    let mut lines = vec![];
+
     for file in files {
         let file = file?;
         let file_name = file.file_name();
@@ -31,9 +34,12 @@ fn main() -> io::Result<()> {
         let file_stem = file_name_str.split('.').next().unwrap_or(&file_name_str);
 
         if file_stem.to_lowercase() != "main" {
-            links.push(format!("- [{}](src/{})", file_stem, file_name_str));
+            lines.push(format!("- [{}](src/{})", file_stem, file_name_str));
         }
     }
+
+    lines.sort_unstable();
+    links.extend(lines);
 
     let mut file = File::create("README.md")?;
     for link in links {
